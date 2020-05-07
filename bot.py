@@ -294,31 +294,36 @@ class MyClient(discord.Client):
             await message.channel.send("Your schedule information has been updated!")
 
         if "delay" in messageText:
+            newMessage = ''
             try:
-                time = [int(word) for word in messageText.split() if word.isdigit()]
-                time = time[0]
-                if "week" in messageText:  
-                    time = datetime.datetime.now() + datetime.timedelta(days=time*7)
-                    print('Delaying for ' + str(time) + 'week' if time == 1 else 'weeks' + '!')
-                elif "day" in messageText:  
-                    time = datetime.datetime.now() + datetime.timedelta(days=time)
-                    print('Delaying for ' + str(time) + 'day' if time == 1 else 'days' + '!')
-                elif "hour" in messageText:  
-                    time = datetime.datetime.now() + datetime.timedelta(hour=time)
-                    print('Delaying for ' + str(time) + 'hour' if time == 1 else 'hours' + '!')
-                elif "minute" in messageText:  
-                    time = datetime.datetime.now() + datetime.timedelta(minutes=time)
-                    print('Delaying for ' + str(time) + 'minute' if time == 1 else 'minutes' + '!')
-                elif "second" in messageText:  
-                    time = datetime.datetime.now() + datetime.timedelta(seconds=time)
-                    print('Delaying for ' + str(time) + 'second' if time == 1 else 'seconds' + '!')
+                time = datetime.datetime.now()
+                ogTime = [int(word) for word in messageText.split() if word.isdigit()]
+                ogTime = ogTime[0]
+                unit = ''
+                if "week" in message.content:
+                    unit = 'week'
+                    time = datetime.datetime.now() + datetime.timedelta(days=ogTime*7)
+                elif "day" in message.content:
+                    unit = 'day'
+                    time = datetime.datetime.now() + datetime.timedelta(days=ogTime)
+                elif "hour" in message.content:
+                    unit = 'hour'
+                    time = datetime.datetime.now() + datetime.timedelta(hours=ogTime)
+                elif "minute" in message.content:  
+                    unit = 'minute'
+                    time = datetime.datetime.now() + datetime.timedelta(minutes=ogTime)
+                elif "second" in message.content:  
+                    unit = 'second'
+                    time = datetime.datetime.now() + datetime.timedelta(seconds=ogTime)
+                unit = (' ' + unit) if ogTime == 1 else (' ' + unit + 's')
+                newMessage = 'Delaying reminder for ' + str(ogTime) + unit + '!'
                 
                 task = users[message.author.id].lastTask
                 newTask = Task(user=task.user, name=task.name, isClass=task.isClass, message=task.message, time=time, days=task.days)
                 tasks[time].add(newTask)
             except:
-                print('Please use the format "delay for (number) of (unit)". Some units include days, minutes, weeks.')
-
+                newMessage = 'Please use the format "delay for (number) of (unit)" (WITH SPACES :eyes:). Some units include days, minutes, weeks.'
+            await message.channel.send(newMessage)
 
 client = MyClient()
 checkRemind.start()
